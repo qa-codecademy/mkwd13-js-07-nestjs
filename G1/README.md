@@ -4,5 +4,5 @@ Repository for NestJS.
 
 ## Team
 
-- Trainer: [John Doe](mailto:john.doe@example.com)
+- Trainer: borisovski.borce@gmail.com
 - Assistant: igorveic7@gmail.com
