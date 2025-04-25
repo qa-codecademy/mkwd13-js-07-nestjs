@@ -1,8 +1,7 @@
 {
 	"name": "class_01_ts_1",
 	"version": "1.0.0",
-	"main": "index.js",
-	"type": "module",
+	"main": "examples/index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "ts-node examples/index.ts",
