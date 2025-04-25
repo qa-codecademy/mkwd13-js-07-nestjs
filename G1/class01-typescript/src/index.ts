@@ -301,5 +301,5 @@ const hpLaptop = new Laptop(
 );
 
 console.log(hpLaptop);
-
-console.log(hpLaptop.serialNum);
+//Wont work because it is private
+// console.log(hpLaptop.serialNum);
