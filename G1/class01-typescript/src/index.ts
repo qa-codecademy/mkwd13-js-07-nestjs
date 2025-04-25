@@ -153,3 +153,153 @@ const printAcademy = (academy: AcademyTitle, length = 12) => {
 };
 
 printAcademy("design", 6);
+
+//Interfaces
+
+interface Product {
+  title: string;
+  stock: number;
+  description: string;
+  category: string;
+  price: number;
+  rating?: number;
+  //If void return type is used , you can return anything but its best avoided
+  printInfo: () => void;
+}
+
+const shoes: Product = {
+  title: "Dress Shoes",
+  stock: 120,
+  description: "Very fancy shoes",
+  category: "Footwear",
+  price: 199.99,
+  rating: 8.4,
+
+  printInfo() {
+    console.log(`${this.title} : ${this.description}`);
+  },
+};
+
+shoes.printInfo();
+
+interface Person {
+  firstName: string;
+  lastName: string;
+
+  getFullName(): string;
+}
+
+//Interfaces can be extended by can't be combined with &
+interface Professional extends Person {
+  jobTitle: string;
+  salary: number;
+}
+
+const mechanic: Professional = {
+  firstName: "John",
+  lastName: "Doe",
+  jobTitle: "Car Mechanic",
+  salary: 999999999,
+
+  getFullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+};
+
+console.log(mechanic);
+
+console.log(mechanic.getFullName());
+
+type Programmer = Person &
+  Professional & {
+    programmingLanguage: string;
+  };
+
+const igor: Programmer = {
+  firstName: "Igor",
+  lastName: "Veic",
+  jobTitle: "Software Engineer",
+  salary: 3000000,
+  programmingLanguage: "Javascript",
+
+  getFullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
+};
+
+console.log(igor);
+
+//Classes
+
+//Implements example with javascript vanilla constructor syntax
+class WashingMachine implements Product {
+  title: string;
+  stock: number;
+  category: string;
+  description: string;
+  price: number;
+  rating: number;
+  serialNumber = "A121412312312";
+
+  constructor(
+    title: string,
+    stock: number,
+    category: string,
+    description: string,
+    price: number,
+    rating: number
+  ) {
+    this.title = title;
+    this.stock = stock;
+    this.category = category;
+    this.description = description;
+    this.price = price;
+    this.rating = rating;
+  }
+
+  printInfo() {}
+
+  getSerialNumber() {
+    return this.serialNumber;
+  }
+}
+
+//Modern typescript syntax for working with constructors
+class Laptop implements Product {
+  productionYear = 2023;
+  private serialNum = "L21312412312";
+
+  constructor(
+    public title: string,
+    public stock: number,
+    public description: string,
+    public category: string,
+    public price: number,
+    public rating: number,
+    public countryOfOrigin: string
+  ) {}
+
+  printInfo() {
+    console.log(
+      `The laptop was made in ${this.countryOfOrigin}, has a rating of ${this.rating} and has a stock of: ${this.stock}`
+    );
+  }
+
+  getSerialNum(): string {
+    return this.serialNum;
+  }
+}
+
+const hpLaptop = new Laptop(
+  "Legion",
+  12300,
+  "Gaming Laptop, why would you buy",
+  "Portale Computers",
+  1200,
+  7.8,
+  "China"
+);
+
+console.log(hpLaptop);
+
+console.log(hpLaptop.serialNum);
