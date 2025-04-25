@@ -142,3 +142,27 @@ export enum DaysAsWords {
 	Saturday = 'Saturday',
 	Sunday = 'Sunday',
 }
+
+// Array
+let numbers: number[] = [1, 2, 3];
+let ages: Array<number> = [1, 2, 3];
+
+// Tuple
+let something: [string, number] = ['some string', 12];
+// something = [123, 'dasdsa']
+something = ['changed', 3412324];
+let react: [unknown, () => void] = ['test', () => {}];
+
+// Types
+type Shape = 'circle' | 'square' | 'triangle';
+
+let box1: Shape = 'circle';
+
+type BrightColors = 'yellow' | 'white' | 'pink';
+type DarkColors = 'black' | 'brown';
+
+type AlphaNumeric = number | string;
+
+type Colors = BrightColors | DarkColors;
+
+let colorfulBox: Colors = 'brown';
