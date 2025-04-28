@@ -266,7 +266,7 @@ class WashingMachine implements Product {
 
 //Modern typescript syntax for working with constructors
 class Laptop implements Product {
-  productionYear = 2023;
+  readonly productionYear = 2023;
   private serialNum = "L21312412312";
 
   constructor(
@@ -288,6 +288,12 @@ class Laptop implements Product {
   getSerialNum(): string {
     return this.serialNum;
   }
+
+  updateSerialNum(newSerialNum: string) {
+    if (newSerialNum[0] !== "L") return;
+
+    this.serialNum = newSerialNum;
+  }
 }
 
 const hpLaptop = new Laptop(
@@ -303,3 +309,13 @@ const hpLaptop = new Laptop(
 console.log(hpLaptop);
 //Wont work because it is private
 // console.log(hpLaptop.serialNum);
+
+hpLaptop.title = "I JUST GOT HACKED";
+
+console.log(hpLaptop.getSerialNum());
+
+hpLaptop.updateSerialNum("L7777777777777");
+
+console.log("After update", hpLaptop.getSerialNum());
+
+console.log("Reading the readonly property", hpLaptop.productionYear);
