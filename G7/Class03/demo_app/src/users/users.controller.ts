@@ -1,5 +1,17 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 
+interface UserBody {
+    fullName: string,
+    email: string
+}
+
+interface User {
+    id: number
+    fullName: string
+    email: string
+};
+
+
 @Controller('users')
 export class UsersController {
     private users = [
@@ -12,7 +24,16 @@ export class UsersController {
         return this.users
     }
 
-    // TODO: Finish this route that creates a new user
     @Post()
-    create(){}
+    create(@Body() { fullName, email }: UserBody){
+        const newUser: User = {
+            id: this.users.length + 1,
+            fullName,
+            email
+        };
+
+        this.users.push(newUser)
+
+        return newUser
+    }
 }

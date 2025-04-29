@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Res, Delete, Put } from "@nestjs/common";
+import { Controller, Get, Post, Body, Param, Res, Delete, Put, Query } from "@nestjs/common";
 import { Response } from "express";
 
 interface ProductReqBody {
@@ -28,6 +28,27 @@ export class ProductsController {
     @Get() 
     findAll(){
         return this.products;
+    }
+
+    // localhost:3000/products/search => MAIN ROUTE
+    // QUERY PARAMETERS (key=value) PAIR; localhost:3000/products/search?key=value 
+    // localhost:3000/products/search?minPrice=2000&category=Audio
+    @Get('search')
+    search(
+        @Query('minPrice') minPrice?: string,
+        @Query('category') category?: string
+    ){
+        let result = [...this.products];
+
+        if(minPrice){
+            result = result.filter((product) => product.price >= parseFloat(minPrice))
+        }
+
+        if(category){
+            result = result.filter((product) => product.category === category)
+        }
+
+        return result
     }
 
     // route: localhost:3000/products & method: POST
