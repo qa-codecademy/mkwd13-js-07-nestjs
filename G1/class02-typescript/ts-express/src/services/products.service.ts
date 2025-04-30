@@ -63,4 +63,15 @@ export class ProductsService {
 
     await this.saveProducts(updatedProducts);
   }
+
+  static async deleteProduct(id: string) {
+    const products = await this.getAllProducts();
+
+    const updatedProducts = products.filter(product => product.id !== id);
+
+    if (products.length === updatedProducts.length)
+      throw new Error("product not found");
+
+    await this.saveProducts(updatedProducts);
+  }
 }
