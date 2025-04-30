@@ -63,4 +63,18 @@ export class ProductsController {
       });
     }
   };
+
+  static deleteProduct: RequestHandler = async (req, res) => {
+    try {
+      const productId = req.params.id;
+
+      await ProductsService.deleteProduct(productId);
+
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(404).json({
+        error: (error as Error).message,
+      });
+    }
+  };
 }
