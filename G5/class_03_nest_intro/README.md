@@ -16,6 +16,13 @@ This class introduces students to the NestJS CLI and basic controller concepts i
 ## CLI Commands Used
 
 ```bash
+
+# Install Nest CLI globally (just once)
+npm install -g @nest/cli
+
+# Verify Nest CLI
+nest -v
+
 # Create a new NestJS project
 nest new pancake-shop
 
