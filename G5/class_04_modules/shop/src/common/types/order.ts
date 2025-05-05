@@ -11,3 +11,5 @@ export interface Order {
   total: number;
   status: OrderStatus;
 }
+
+export type OrderCreate = Pick<Order, 'items'>;

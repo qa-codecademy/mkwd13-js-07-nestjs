@@ -11,6 +11,12 @@ export class ProductsService {
       price: 10,
       description: 'A very nice table',
     },
+    {
+      id: 2,
+      name: 'Keyboard',
+      price: 100,
+      description: 'A very nice keyboard',
+    },
   ];
 
   findAll(): Product[] {
