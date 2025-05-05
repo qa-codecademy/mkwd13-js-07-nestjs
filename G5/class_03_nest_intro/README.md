@@ -17,7 +17,7 @@ This class introduces students to the NestJS CLI and basic controller concepts i
 
 ```bash
 
-# Install Nest CLI globally (just once)
+# Install Nest CLI globally (just once - check if you have version (command below))
 npm install -g @nest/cli
 
 # Verify Nest CLI
@@ -25,6 +25,13 @@ nest -v
 
 # Create a new NestJS project
 nest new pancake-shop
+
+# Navigate to new project folder
+
+cd pancake-shop
+
+# Delete .git folder
+# find hidden .git folder in pancake-shop (project folder) and delete it completely to avoid committing issue
 
 # Generate a controller
 nest generate controller pancakes
