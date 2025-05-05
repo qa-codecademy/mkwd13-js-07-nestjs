@@ -4,3 +4,6 @@ export interface Product {
   price: number;
   description: string;
 }
+
+export type CreateProduct = Omit<Product, 'id'>;
+export type UpdateProduct = Omit<Product, 'id'>;
