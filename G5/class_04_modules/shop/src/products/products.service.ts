@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProduct, Product, UpdateProduct } from '../common/types/product';
+import {
+  CreateProduct,
+  Product,
+  ProductDetails,
+  UpdateProduct,
+} from '../common/types/product';
 
 @Injectable()
 export class ProductsService {
@@ -25,6 +30,11 @@ export class ProductsService {
 
   findOne(id: number): Product | null {
     return this.products.find((product) => product.id === id) ?? null;
+  }
+
+  productDetails(id: number): ProductDetails {
+    // Find the product
+    // Attach the orders count
   }
 
   create(body: CreateProduct): Product {

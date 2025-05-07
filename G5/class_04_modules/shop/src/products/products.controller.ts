@@ -10,7 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProduct, Product, UpdateProduct } from '../common/types/product';
+import {
+  CreateProduct,
+  Product,
+  ProductDetails,
+  UpdateProduct,
+} from '../common/types/product';
 
 // localhost:3000/products
 @Controller('products')
@@ -26,6 +31,20 @@ export class ProductsController {
   @Get('/:id')
   findOne(@Param('id') id: string): Product | null {
     return this.productsService.findOne(+id);
+  }
+
+  // localhost:3000/team/:teamId/player/:playerId
+  // @Param('teamId') teamId: string
+  // @Param('playerId') playerId: string
+  //   {
+  //   'teamId': 1,
+  //     'playerId': 2
+  //   }
+
+  // localhost:3000/products/:id/details/
+  @Get('/:id/details')
+  productDetails(@Param('id') id: string): ProductDetails {
+    return this.productsService.productDetails(+id);
   }
 
   @Post()

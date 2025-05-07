@@ -13,3 +13,4 @@ export interface Order {
 }
 
 export type OrderCreate = Pick<Order, 'items'>;
+export type OrderUpdate = Pick<Order, 'items'>;
