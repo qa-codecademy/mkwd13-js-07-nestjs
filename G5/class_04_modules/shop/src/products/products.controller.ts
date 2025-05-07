@@ -43,7 +43,7 @@ export class ProductsController {
 
   // localhost:3000/products/:id/details/
   @Get('/:id/details')
-  productDetails(@Param('id') id: string): ProductDetails {
+  productDetails(@Param('id') id: string): ProductDetails | null {
     return this.productsService.productDetails(+id);
   }
 

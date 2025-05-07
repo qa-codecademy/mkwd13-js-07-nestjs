@@ -1,13 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   CreateProduct,
   Product,
   ProductDetails,
   UpdateProduct,
 } from '../common/types/product';
+import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
 export class ProductsService {
+  constructor(
+    @Inject(forwardRef(() => OrdersService))
+    private readonly orderService: OrdersService,
+  ) {}
+
   // This mocks a database
   private products: Product[] = [
     {
@@ -32,9 +38,23 @@ export class ProductsService {
     return this.products.find((product) => product.id === id) ?? null;
   }
 
-  productDetails(id: number): ProductDetails {
+  productDetails(id: number): ProductDetails | null {
     // Find the product
+    const product = this.products.find((product) => product.id === id);
+
+    if (!product) {
+      return null;
+    }
+
+    // Get orders count
+    const ordersCount = this.orderService.getOrdersCountByProductId(id);
+
     // Attach the orders count
+
+    return {
+      ...product,
+      ordersCount,
+    } satisfies ProductDetails;
   }
 
   create(body: CreateProduct): Product {

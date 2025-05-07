@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Order, OrderCreate, OrderUpdate } from '../common/types/order';
 import { OrderStatus } from '../common/types/order-status.enum';
 import { ProductsService } from '../products/products.service';
@@ -6,7 +6,10 @@ import { Product } from '../common/types/product';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    @Inject(forwardRef(() => ProductsService))
+    private readonly productsService: ProductsService,
+  ) {}
 
   // Mocking a DB
   private orders: Order[] = [
@@ -14,6 +17,12 @@ export class OrdersService {
       id: 1,
       items: [{ productId: 1, quantity: 2 }],
       total: 120,
+      status: OrderStatus.Completed,
+    },
+    {
+      id: 1,
+      items: [{ productId: 1, quantity: 5 }],
+      total: 321,
       status: OrderStatus.Completed,
     },
     {
@@ -154,4 +163,25 @@ export class OrdersService {
 
     this.orders[existingOrderIndex].status = OrderStatus.Canceled;
   }
+
+  getOrdersCountByProductId(productId: number): number {
+    return this.orders.reduce((sum, order) => {
+      const item = order.items.find((i) => i.productId === productId);
+      console.log(item);
+
+      if (!item) {
+        return sum;
+      }
+
+      sum += item.quantity;
+      return sum;
+    }, 0);
+  }
 }
+
+// sum += order.items
+// .filter((item) => item.productId === productId)
+// .reduce((productSum, product) => {
+//   productSum += product.quantity;
+//   return productSum;
+// }, 0);
