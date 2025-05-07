@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Computer",
+    "stock": 50,
+    "price": 1000,
+    "tags": ["Card", "alliance", "USB"],
+    "details": {
+      "description": "a very fancy product from china",
+      "productionYear": 2023,
+      "madeIn": "China",
+      "brand": "Random Chinese Brand",
+      "warrantyInYears": 15
+    },
+    "id": "7a1a1de9-9703-4ead-8b76-8c59473872c6"
+  }
+]
