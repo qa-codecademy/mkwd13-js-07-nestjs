@@ -1,21 +1,23 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import {
-  CreateProduct,
-  Product,
-  ProductDetails,
-  UpdateProduct,
-} from '../common/types/product';
 import { OrdersService } from '../orders/orders.service';
+import { LoggerService } from '../common/services/logger.service';
+import {
+  CreateProductDto,
+  ProductDetailsDto,
+  ProductDto,
+  UpdateProductDto,
+} from './dto/product.dto';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @Inject(forwardRef(() => OrdersService))
     private readonly orderService: OrdersService,
+    private readonly logger: LoggerService,
   ) {}
 
   // This mocks a database
-  private products: Product[] = [
+  private products: ProductDto[] = [
     {
       id: 1,
       name: 'Table',
@@ -30,15 +32,19 @@ export class ProductsService {
     },
   ];
 
-  findAll(): Product[] {
+  findAll(): ProductDto[] {
+    this.logger.log(
+      'ProductService',
+      `User fetching all products. Products count: ${this.products.length}`,
+    );
     return this.products;
   }
 
-  findOne(id: number): Product | null {
+  findOne(id: number): ProductDto | null {
     return this.products.find((product) => product.id === id) ?? null;
   }
 
-  productDetails(id: number): ProductDetails | null {
+  productDetails(id: number): ProductDetailsDto | null {
     // Find the product
     const product = this.products.find((product) => product.id === id);
 
@@ -54,21 +60,21 @@ export class ProductsService {
     return {
       ...product,
       ordersCount,
-    } satisfies ProductDetails;
+    } satisfies ProductDetailsDto;
   }
 
-  create(body: CreateProduct): Product {
+  create(body: CreateProductDto): ProductDto {
     const newProduct = {
       ...body,
       id: this.products.length + 1,
-    } satisfies Product;
+    } satisfies ProductDto;
 
     this.products.push(newProduct);
 
     return newProduct;
   }
 
-  update(id: number, body: UpdateProduct): Product | null {
+  update(id: number, body: UpdateProductDto): ProductDto | null {
     // find the product
     const productIndex = this.products.findIndex(
       (product) => product.id === id,

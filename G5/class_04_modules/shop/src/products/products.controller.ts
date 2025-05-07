@@ -10,12 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { Product } from '../common/types/product';
 import {
-  CreateProduct,
-  Product,
-  ProductDetails,
-  UpdateProduct,
-} from '../common/types/product';
+  CreateProductDto,
+  ProductDetailsDto,
+  UpdateProductDto,
+} from './dto/product.dto';
 
 // localhost:3000/products
 @Controller('products')
@@ -43,17 +43,20 @@ export class ProductsController {
 
   // localhost:3000/products/:id/details/
   @Get('/:id/details')
-  productDetails(@Param('id') id: string): ProductDetails | null {
+  productDetails(@Param('id') id: string): ProductDetailsDto | null {
     return this.productsService.productDetails(+id);
   }
 
   @Post()
-  create(@Body() body: CreateProduct): Product {
+  create(@Body() body: CreateProductDto): Product {
     return this.productsService.create(body);
   }
 
   @Patch('/:id')
-  update(@Body() body: UpdateProduct, @Param('id') id: string): Product | null {
+  update(
+    @Body() body: UpdateProductDto,
+    @Param('id') id: string,
+  ): Product | null {
     return this.productsService.update(+id, body);
   }
 
