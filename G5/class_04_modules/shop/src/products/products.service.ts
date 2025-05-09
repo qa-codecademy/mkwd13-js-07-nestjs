@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OrdersService } from '../orders/orders.service';
 import { LoggerService } from '../common/services/logger.service';
 import {
@@ -40,17 +45,19 @@ export class ProductsService {
     return this.products;
   }
 
-  findOne(id: number): ProductDto | null {
-    return this.products.find((product) => product.id === id) ?? null;
-  }
-
-  productDetails(id: number): ProductDetailsDto | null {
-    // Find the product
+  findOne(id: number): ProductDto {
     const product = this.products.find((product) => product.id === id);
 
     if (!product) {
-      return null;
+      throw new NotFoundException(`Product with ID: ${id} is not found`);
     }
+
+    return product;
+  }
+
+  productDetails(id: number): ProductDetailsDto {
+    // Find the product
+    const product = this.findOne(id);
 
     // Get orders count
     const ordersCount = this.orderService.getOrdersCountByProductId(id);
@@ -74,14 +81,14 @@ export class ProductsService {
     return newProduct;
   }
 
-  update(id: number, body: UpdateProductDto): ProductDto | null {
+  update(id: number, body: UpdateProductDto): ProductDto {
     // find the product
     const productIndex = this.products.findIndex(
       (product) => product.id === id,
     );
 
     if (productIndex < 0) {
-      return null;
+      throw new NotFoundException(`Product with ID: ${id} is not found`);
     }
 
     // update the product

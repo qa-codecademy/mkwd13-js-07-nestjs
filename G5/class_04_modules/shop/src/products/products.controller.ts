@@ -6,31 +6,52 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Product } from '../common/types/product';
 import {
   CreateProductDto,
   ProductDetailsDto,
+  ProductDto,
   UpdateProductDto,
 } from './dto/product.dto';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
-// localhost:3000/products
+// localhost:3000/api/products
+@ApiTags('Products')
 @Controller('products')
 export class ProductsController {
   // Dependency Injection
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(): Product[] {
+  @ApiOperation({
+    summary: 'Get all products',
+    description: 'Here we return all products available in the database',
+  })
+  findAll(): ProductDto[] {
     return this.productsService.findAll();
   }
 
   @Get('/:id')
-  findOne(@Param('id') id: string): Product | null {
-    return this.productsService.findOne(+id);
+  @ApiOperation({
+    summary: 'Get a single product by ID',
+  })
+  @ApiOkResponse({
+    description: 'Product is found by ID and returned',
+  })
+  @ApiNotFoundResponse({
+    description: 'Error is thrown if product cannot be found by ID',
+  })
+  findOne(@Param('id', ParseIntPipe) id: number): ProductDto {
+    return this.productsService.findOne(id);
   }
 
   // localhost:3000/team/:teamId/player/:playerId
@@ -43,26 +64,26 @@ export class ProductsController {
 
   // localhost:3000/products/:id/details/
   @Get('/:id/details')
-  productDetails(@Param('id') id: string): ProductDetailsDto | null {
-    return this.productsService.productDetails(+id);
+  productDetails(@Param('id', ParseIntPipe) id: number): ProductDetailsDto {
+    return this.productsService.productDetails(id);
   }
 
   @Post()
-  create(@Body() body: CreateProductDto): Product {
+  create(@Body() body: CreateProductDto): ProductDto {
     return this.productsService.create(body);
   }
 
   @Patch('/:id')
   update(
     @Body() body: UpdateProductDto,
-    @Param('id') id: string,
-  ): Product | null {
-    return this.productsService.update(+id, body);
+    @Param('id', ParseIntPipe) id: number,
+  ): ProductDto {
+    return this.productsService.update(id, body);
   }
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param('id') id: string): void {
-    this.productsService.delete(+id);
+  delete(@Param('id', ParseIntPipe) id: number): void {
+    this.productsService.delete(id);
   }
 }

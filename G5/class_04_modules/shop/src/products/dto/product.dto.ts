@@ -26,10 +26,6 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsOptional()
   description?: string;
-
-  @IsObject()
-  @IsOptional()
-  isYellow: boolean;
 }
 
 export class UpdateProductDto extends CreateProductDto {}

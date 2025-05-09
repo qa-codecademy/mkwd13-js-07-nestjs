@@ -1,8 +1,15 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { Order, OrderCreate, OrderUpdate } from '../common/types/order';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  MethodNotAllowedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { OrderStatus } from '../common/types/order-status.enum';
 import { ProductsService } from '../products/products.service';
-import { Product } from '../common/types/product';
+import { CreateOrderDto, OrderDto, UpdateOrderDto } from './dto/order.dto';
+import { ProductDto } from '../products/dto/product.dto';
 
 @Injectable()
 export class OrdersService {
@@ -12,7 +19,7 @@ export class OrdersService {
   ) {}
 
   // Mocking a DB
-  private orders: Order[] = [
+  private orders: OrderDto[] = [
     {
       id: 1,
       items: [{ productId: 1, quantity: 2 }],
@@ -33,38 +40,44 @@ export class OrdersService {
     },
   ];
 
-  findAll(): Order[] {
+  findAll(): OrderDto[] {
     return this.orders.filter((o) => o.status !== OrderStatus.Canceled);
   }
 
-  findOne(id: number): Order | null {
-    return (
-      this.orders.find(
-        (order) => order.id === id && order.status !== OrderStatus.Canceled,
-      ) ?? null
+  findOne(id: number): OrderDto {
+    const order: OrderDto | undefined = this.orders.find(
+      (order) => order.id === id && order.status !== OrderStatus.Canceled,
     );
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID: ${id} is not found`);
+    }
+
+    return order;
   }
 
-  create({ items }: OrderCreate): Order | null {
+  create({ items }: CreateOrderDto): OrderDto {
     // If there are no items (products) return null (error)
-    if (!items.length) {
-      return null;
-    }
+    // if (!items.length) {
+    //   return null;
+    // }
 
     // check if products have valid quantity
-    const haveValidQuantity = items.every((item) => item.quantity >= 1);
+    // const haveValidQuantity = items.every((item) => item.quantity >= 1);
 
-    if (!haveValidQuantity) {
-      return null;
-    }
+    // if (!haveValidQuantity) {
+    //   return null;
+    // }
 
     // validate that each product exists
-    const products: Product[] = [];
+    const products: ProductDto[] = [];
     for (const item of items) {
       const product = this.productsService.findOne(item.productId);
 
       if (!product) {
-        return null;
+        throw new NotFoundException(
+          `Product with ID: ${item.productId} is not found`,
+        );
       }
 
       products.push(product);
@@ -74,7 +87,7 @@ export class OrdersService {
     const total = items.reduce((sum, item) => {
       const product = products.find(
         (product) => product.id === item.productId,
-      ) as Product;
+      ) as ProductDto;
 
       return sum + product.price * item.quantity;
     }, 0);
@@ -84,47 +97,51 @@ export class OrdersService {
       status: OrderStatus.Pending,
       items,
       total,
-    } satisfies Order;
+    } satisfies OrderDto;
 
     this.orders.push(newOrder);
 
     return newOrder;
   }
 
-  update({ items }: OrderUpdate, id: number): Order | null {
+  update({ items }: UpdateOrderDto, id: number): OrderDto {
     // check if the order exists > if no order > return null
     const existingOrderIndex = this.orders.findIndex(
       (order) => order.id === id,
     );
 
     if (existingOrderIndex < 0) {
-      return null;
+      throw new NotFoundException(`Order with ID: ${id} is not found`);
     }
 
     // check if order is in status pending
     if (this.orders[existingOrderIndex].status !== OrderStatus.Pending) {
-      return null;
+      throw new BadRequestException(
+        `Order with ID: ${id} is ${this.orders[existingOrderIndex].status}`,
+      );
     }
 
     // If there are no items (products) return null (error)
-    if (!items.length) {
-      return null;
-    }
+    // if (!items.length) {
+    //   return null;
+    // }
 
     // check if products have valid quantity
-    const haveValidQuantity = items.every((item) => item.quantity >= 1);
+    // const haveValidQuantity = items.every((item) => item.quantity >= 1);
 
-    if (!haveValidQuantity) {
-      return null;
-    }
+    // if (!haveValidQuantity) {
+    //   return null;
+    // }
 
     // validate that each product exists
-    const products: Product[] = [];
+    const products: ProductDto[] = [];
     for (const item of items) {
       const product = this.productsService.findOne(item.productId);
 
       if (!product) {
-        return null;
+        throw new NotFoundException(
+          `Product with ID: ${item.productId} is not found`,
+        );
       }
 
       products.push(product);
@@ -134,7 +151,7 @@ export class OrdersService {
     const total = items.reduce((sum, item) => {
       const product = products.find(
         (product) => product.id === item.productId,
-      ) as Product;
+      ) as ProductDto;
 
       return sum + product.price * item.quantity;
     }, 0);
@@ -144,7 +161,7 @@ export class OrdersService {
       ...this.orders[existingOrderIndex],
       items,
       total,
-    } satisfies Order;
+    } satisfies OrderDto;
 
     this.orders[existingOrderIndex] = updatedOrder;
 
@@ -158,7 +175,13 @@ export class OrdersService {
     );
 
     if (existingOrderIndex < 0) {
-      return;
+      throw new NotFoundException(`Order with ID: ${id} is not found`);
+    }
+
+    if (this.orders[existingOrderIndex].status !== OrderStatus.Pending) {
+      throw new BadRequestException(
+        `Order is in status ${this.orders[existingOrderIndex].status}`,
+      );
     }
 
     this.orders[existingOrderIndex].status = OrderStatus.Canceled;

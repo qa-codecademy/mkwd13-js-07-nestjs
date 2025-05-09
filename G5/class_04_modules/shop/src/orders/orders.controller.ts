@@ -4,38 +4,42 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { Order, OrderCreate, OrderUpdate } from '../common/types/order';
+import { CreateOrderDto, OrderDto, UpdateOrderDto } from './dto/order.dto';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
-  findAll(): Order[] {
+  findAll(): OrderDto[] {
     return this.ordersService.findAll();
   }
 
   @Get('/:id')
-  findOne(@Param('id') id: string): Order | null {
-    return this.ordersService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number): OrderDto {
+    return this.ordersService.findOne(id);
   }
 
   @Post()
-  create(@Body() body: OrderCreate): Order | null {
+  create(@Body() body: CreateOrderDto): OrderDto {
     return this.ordersService.create(body);
   }
 
   @Patch('/:id')
-  update(@Body() body: OrderUpdate, @Param('id') id: string): Order | null {
-    return this.ordersService.update(body, +id);
+  update(
+    @Body() body: UpdateOrderDto,
+    @Param('id', ParseIntPipe) id: number,
+  ): OrderDto {
+    return this.ordersService.update(body, id);
   }
 
   @Delete('/:id')
-  cancel(@Param('id') id: string): void {
-    this.ordersService.cancel(+id);
+  cancel(@Param('id', ParseIntPipe) id: number): void {
+    this.ordersService.cancel(id);
   }
 }
