@@ -6,6 +6,7 @@ import { CreatePlayerDto } from './dtos/create-player.dto';
 import { v4 as uuid } from 'uuid';
 import { UpdatePlayerDto } from './dtos/update-player.dto';
 import { SkillsService } from 'src/skills/skills.service';
+import { SkillDto } from 'src/skills/dtos/skill.dto';
 
 @Injectable()
 export class PlayersService {
@@ -93,5 +94,21 @@ export class PlayersService {
     return {
       msg: `skill: "${foundSkill.name}" was succssfully added to player: "${foundPlayer.name}"`,
     };
+  }
+
+  async findSkills(id: string) {
+    const foundPlayer = await this.findById(id);
+
+    const playerSkills: SkillDto[] = [];
+
+    for (let skillId of foundPlayer.skills) {
+      const skill = await this.sklllsService.findById(skillId);
+
+      playerSkills.push(skill);
+    }
+
+    console.log(playerSkills);
+
+    return playerSkills;
   }
 }
