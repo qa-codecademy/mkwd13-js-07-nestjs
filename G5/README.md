@@ -2,8 +2,6 @@
 
 Repository for NestJS.
 
-[Postman collection](https://api.postman.com/collections/4603765-d0f03055-43e5-4ff5-965c-e6929f3554c9?access_key=<ACCESS_KEY>)
-
 ## Team
 
 - Trainer: [Ivo Kostovski](mailto:ivo@kostovski.dev) | GH: [@ivoKostovski](https://github.com/ivoKostovski)
