@@ -48,4 +48,9 @@ export class PlayersController {
   addSkill(@Param('id') id: string, @Param('skillId') skillId: string) {
     return this.playersService.addSkill(id, skillId);
   }
+
+  @Get(':id/skills')
+  findSkills(@Param('id') id: string) {
+    return this.playersService.findSkills(id);
+  }
 }
