@@ -8,16 +8,27 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { OrderStatus } from '../../common/types/order-status.enum';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class OrderItemDto {
   @IsNumber()
   @IsDefined()
   @Min(0)
+  @ApiProperty({
+    type: Number,
+    minimum: 0,
+    example: 1,
+  })
   productId: number;
 
   @IsNumber()
   @IsDefined()
   @Min(1)
+  @ApiProperty({
+    type: Number,
+    minimum: 1,
+    example: 1,
+  })
   quantity: number;
 }
 
@@ -28,16 +39,38 @@ export class CreateOrderDto {
   })
   @Type(() => OrderItemDto)
   @ValidateNested()
+  @ApiProperty({
+    type: [OrderItemDto],
+  })
   items: OrderItemDto[];
 }
+// Option 1:
+// type: OrderItemDto,
+// isArray: true,
+
+// Option 2:
+// type: [OrderItemDto],
 
 export class UpdateOrderDto extends CreateOrderDto {}
 
 export class OrderDto extends CreateOrderDto {
   // Decorators in response return types are not needed as they are not even used in most cases
 
+  @ApiProperty({
+    type: Number,
+  })
   id: number;
+
+  @ApiProperty({
+    type: Number,
+  })
   total: number;
+
+  @ApiProperty({
+    enum: OrderStatus,
+    example: OrderStatus.Pending,
+    description: `Statuses of the order: ${Object.values(OrderStatus).join(', ')}`,
+  })
   status: OrderStatus;
 }
 
