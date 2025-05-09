@@ -1,98 +1,166 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Blog Post API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project demonstrates a NestJS application with validation and API documentation features. It showcases how to create a simple blog post API with proper validation and Swagger documentation.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Key Concepts Covered
 
-## Description
+### Class Validator
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[class-validator](https://github.com/typestack/class-validator) is a library that allows you to use decorator-based validation in your NestJS applications. It provides a set of decorators to validate object properties based on certain constraints.
 
-## Project setup
+#### How to Implement:
+
+1. Install the required packages:
 
 ```bash
-$ npm install
+npm install class-validator class-transformer
 ```
 
-## Compile and run the project
+2. Enable validation in your main.ts:
+
+```typescript
+import { ValidationPipe } from '@nestjs/common';
+
+app.useGlobalPipes(new ValidationPipe());
+```
+
+3. Add validation decorators to your DTOs:
+
+```typescript
+import { IsNotEmpty, IsString, IsOptional, MaxLength, MinLength } from 'class-validator';
+
+export class CreateBlogPostDTO {
+    @IsNotEmpty()
+    @IsString()
+    @MinLength(5)
+    @MaxLength(100)
+    title: string;
+    
+    @IsNotEmpty()
+    @IsString()
+    @MinLength(10)
+    content: string;
+    
+    @IsString()
+    @IsOptional()
+    author?: string;
+}
+```
+
+### Swagger Documentation
+
+[Swagger](https://swagger.io/) (OpenAPI) is a tool that helps you design, build, document, and consume REST APIs. NestJS provides an integrated module `@nestjs/swagger` to generate API documentation automatically.
+
+#### How to Implement:
+
+1. Install the Swagger package:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install @nestjs/swagger swagger-ui-express
 ```
 
-## Run tests
+2. Set up Swagger in your main.ts:
 
+```typescript
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+const config = new DocumentBuilder()
+  .setTitle('Blog Post API')
+  .setDescription('API documentation about the Blog Post application.')
+  .build();
+  
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('docs', app, document);
+```
+
+3. Decorate your controllers and DTOs:
+
+```typescript
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+
+@ApiOperation({ summary: 'Get all blog posts' })
+@ApiResponse({ status: 200, description: 'Returns all blog posts' })
+@Get()
+findAll() {
+    // ...
+}
+```
+
+4. Enhance DTOs with documentation:
+
+```typescript
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateBlogPostDTO {
+    @ApiProperty({
+        description: 'The title of the blog post',
+        example: 'My First Blog Post',
+        minLength: 5,
+        maxLength: 100
+    })
+    @IsNotEmpty()
+    @IsString()
+    title: string;
+    // ...
+}
+```
+
+## Project Structure
+
+- **Controller**: Handles HTTP requests and returns responses
+- **Service**: Contains business logic
+- **DTOs**: Define data shapes for API requests with validation
+- **Interfaces**: Define data models
+
+## Running the Application
+
+1. Install dependencies:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+2. Start the application:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. Access the Swagger documentation:
+```
+http://localhost:3000/docs
+```
 
-## Resources
+## Key Features
 
-Check out a few resources that may come in handy when working with NestJS:
+1. **Data Validation**: Input validation using class-validator
+2. **API Documentation**: Comprehensive API documentation using Swagger
+3. **Modular Architecture**: Separation of concerns with NestJS modules
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Examples
 
-## Support
+### Validation Example
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```typescript
+@IsNotEmpty()
+@IsString()
+@MinLength(5)
+@MaxLength(100)
+title: string;
+```
 
-## Stay in touch
+This ensures that:
+- Title cannot be empty
+- Title must be a string
+- Title must be at least 5 characters
+- Title cannot exceed 100 characters
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Swagger Documentation Example
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```typescript
+@ApiOperation({ summary: "Get blog post by id." })
+@ApiResponse({ status: 200, description: 'Returns blog post by id.' })
+@ApiParam({ name: 'id', description: 'The id of the blog post we search.' })
+@Get(':id')
+findById(@Param('id') id: string) {
+    return this.blogpostService.findById(id);
+}
+```
