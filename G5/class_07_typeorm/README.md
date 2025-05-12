@@ -60,6 +60,11 @@ nest new reminder-app
 npm install @nestjs/typeorm typeorm pg class-validator class-transformer @nestjs/swagger @nestjs/config
 
 # Generate resources
+nest generate module reminders
+nest generate controller reminders
+nest generate service reminders
+
+# Shorthand for upper commands
 nest g resource reminders
 nest g resource users
 ```
