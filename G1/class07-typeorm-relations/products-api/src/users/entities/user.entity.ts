@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Order } from 'src/orders/entities/order.entity';
+import { UserAddress } from 'src/user-address/entities/user-address.entity';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -20,5 +28,10 @@ export class User {
   age: number;
 
   //User Details
+  @OneToOne(() => UserAddress, (userAddres) => userAddres.user)
+  userAddress: UserAddress;
+
   //Orders
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
