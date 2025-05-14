@@ -41,7 +41,9 @@ export class OrdersService {
   }
 
   findAll() {
-    return this.ordersRepo.find();
+    return this.ordersRepo.find({
+      loadEagerRelations: false,
+    });
   }
 
   async findOne(id: number) {
