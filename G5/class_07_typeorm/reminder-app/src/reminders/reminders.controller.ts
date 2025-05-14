@@ -28,6 +28,15 @@ export class RemindersController {
     return this.remindersService.getAll();
   }
 
+  // localhost:3000/api/reminders?userId=1 > this is ok
+  // localhost:3000/api/users/:id/reminders  > this is not really ok
+  // localhost:3000/api/reminders/:id > this is really not ok
+  // localhost:3000/api/reminders/user/:id > this is preferable
+  @Get('/user/:id')
+  getUserReminders(@Param('id', ParseIntPipe) id: number): Promise<Reminder[]> {
+    return this.remindersService.search(id);
+  }
+
   @Get('/:id')
   @ApiOperation({
     summary: 'Get one reminder by ID',

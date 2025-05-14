@@ -11,7 +11,11 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './user.entity';
-import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -30,7 +34,13 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  @ApiOperation({
+    summary: 'Get all users',
+  })
+  @ApiOkResponse({
+    type: [User],
+  })
+  findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 

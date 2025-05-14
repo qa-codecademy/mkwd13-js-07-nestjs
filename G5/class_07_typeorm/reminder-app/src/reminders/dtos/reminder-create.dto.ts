@@ -5,6 +5,7 @@ import {
   IsDate,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -52,4 +53,12 @@ export class ReminderCreateDto {
     default: false,
   })
   isCompleted: boolean = false;
+
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    description: 'The ID of a user that is the author of the reminder',
+    example: 1,
+  })
+  authorId: number;
 }

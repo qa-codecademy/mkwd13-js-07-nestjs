@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reminder } from './reminder.entity';
 import { Repository } from 'typeorm';
@@ -16,6 +20,14 @@ export class RemindersService {
     return this.reminderRepository.find({ withDeleted: true });
   }
 
+  search(authorId: number): Promise<Reminder[]> {
+    return this.reminderRepository.find({
+      where: {
+        authorId,
+      },
+    });
+  }
+
   async getOne(id: number): Promise<Reminder> {
     const reminder = await this.reminderRepository.findOneBy({
       id,
@@ -28,9 +40,14 @@ export class RemindersService {
     return reminder;
   }
 
-  create(body: ReminderCreateDto): Promise<Reminder> {
-    const reminder = this.reminderRepository.create(body);
-    return this.reminderRepository.save(reminder);
+  async create(body: ReminderCreateDto): Promise<Reminder> {
+    try {
+      const reminder = this.reminderRepository.create(body);
+      return await this.reminderRepository.save(reminder);
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new BadRequestException(error.detail);
+    }
   }
 
   async update(id: number, body: ReminderUpdateDto): Promise<Reminder> {
