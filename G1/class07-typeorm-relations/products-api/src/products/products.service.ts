@@ -23,6 +23,19 @@ export class ProductsService {
     return foundProduct;
   }
 
+  async findProductOrders(id: number) {
+    const foundProduct = await this.productsRepo.findOne({
+      where: { id },
+      relations: {
+        orders: true,
+      },
+    });
+
+    if (!foundProduct) throw new NotFoundException('product not found');
+
+    return foundProduct;
+  }
+
   async create(createData: CreateProductDto) {
     return this.productsRepo.save(createData);
   }

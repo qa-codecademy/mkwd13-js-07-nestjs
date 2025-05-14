@@ -27,7 +27,7 @@ export class User {
   @Column({ type: 'int' })
   age: number;
 
-  //User Details
+  //User Address
   @OneToOne(() => UserAddress, (userAddres) => userAddres.user)
   userAddress: UserAddress;
 
