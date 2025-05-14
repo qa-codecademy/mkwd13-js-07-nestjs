@@ -5,9 +5,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reminder } from './reminder.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ReminderCreateDto } from './dtos/reminder-create.dto';
 import { ReminderUpdateDto } from './dtos/reminder-update.dto';
+import { ReminderQueryDto } from './dtos/reminder-query.dto';
 
 @Injectable()
 export class RemindersService {
@@ -16,15 +17,46 @@ export class RemindersService {
     private readonly reminderRepository: Repository<Reminder>,
   ) {}
 
-  getAll(): Promise<Reminder[]> {
-    return this.reminderRepository.find({ withDeleted: true });
-  }
+  search({
+    authorId,
+    priority,
+    startDueDate,
+    endDueDate,
+    isCompleted,
+    searchTerm,
+  }: ReminderQueryDto): Promise<Reminder[]> {
+    let query: FindOptionsWhere<Reminder> = {};
 
-  search(authorId: number): Promise<Reminder[]> {
-    return this.reminderRepository.find({
-      where: {
+    if (authorId) {
+      query = {
+        ...query,
         authorId,
-      },
+      };
+    }
+
+    if (priority) {
+      query = {
+        ...query,
+        priority,
+      };
+    }
+
+    if (isCompleted !== undefined) {
+      query = {
+        ...query,
+        isCompleted,
+      };
+    }
+
+    if (searchTerm) {
+      query = {
+        ...query,
+        title: ILike(`%${searchTerm}%`),
+      };
+    }
+
+    return this.reminderRepository.find({
+      where: query,
     });
   }
 
