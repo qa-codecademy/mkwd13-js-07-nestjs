@@ -12,16 +12,24 @@ export class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    name: 'title',
+  })
   title: string;
 
-  @Column()
+  @Column({
+    name: 'stock',
+  })
   stock: number;
 
-  @Column()
+  @Column({
+    name: 'price',
+  })
   price: number;
 
-  @Column()
+  @Column({
+    name: 'is_available',
+  })
   isAvailable: boolean;
 
   @ManyToMany(() => Order, (order) => order.products)

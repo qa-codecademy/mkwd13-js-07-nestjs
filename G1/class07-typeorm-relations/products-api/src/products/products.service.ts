@@ -12,7 +12,10 @@ export class ProductsService {
   ) {}
 
   async findAll() {
-    return this.productsRepo.find();
+    return this.productsRepo.find({
+      //Will load all ids of relations of a given entity
+      // loadRelationIds: true,
+    });
   }
 
   async findById(id: number) {
