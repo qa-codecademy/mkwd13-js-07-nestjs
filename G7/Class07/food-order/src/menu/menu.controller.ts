@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
+import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 
 @Controller('menu')
 export class MenuController {
@@ -22,14 +23,37 @@ export class MenuController {
   }
 
   @Get()
-  findAll() {}
+  findAll() {
+    const menuItems = this.menuService.findAll();
 
-  @Get()
-  findOne() {}
+    return menuItems;
+  }
 
-  @Patch()
-  update() {}
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    const menuItem = this.menuService.findOne(+id);
 
-  @Delete()
-  remove() {}
+    return menuItem;
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateMenuItemDto: UpdateCustomerDto,
+  ) {
+    const response = this.menuService.update(+id, updateMenuItemDto);
+
+    return {
+      message: 'Success update',
+    };
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    this.menuService.remove(+id);
+
+    return {
+      message: 'Success delete',
+    };
+  }
 }
