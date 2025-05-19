@@ -32,8 +32,9 @@ export class RemindersController {
   @ApiOperation({
     summary: 'Search reminders',
   })
-  search(@Query() query: ReminderQueryDto): Promise<Reminder[]> {
-    console.log(query);
+  search(
+    @Query() query: ReminderQueryDto,
+  ): Promise<{ reminders: Reminder[]; total: number }> {
     return this.remindersService.search(query);
   }
 
@@ -44,7 +45,7 @@ export class RemindersController {
   @Get('/user/:id')
   getUserReminders(
     @Param('id', ParseIntPipe) authorId: number,
-  ): Promise<Reminder[]> {
+  ): Promise<{ reminders: Reminder[]; total: number }> {
     return this.remindersService.search({ authorId });
   }
 

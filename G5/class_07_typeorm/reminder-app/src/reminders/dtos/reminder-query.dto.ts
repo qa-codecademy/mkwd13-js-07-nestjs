@@ -4,12 +4,15 @@ import {
   IsBoolean,
   IsDate,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { ReminderSortBy } from '../../common/types/reminder-sort-by.enum';
+import { SortDirection } from '../../common/types/sort-direction.enum';
 
 export class ReminderQueryDto {
   @IsString()
@@ -66,4 +69,38 @@ export class ReminderQueryDto {
     type: Number,
   })
   authorId?: number;
+
+  @IsOptional()
+  @IsEnum(ReminderSortBy)
+  @ApiPropertyOptional({
+    enum: ReminderSortBy,
+    default: ReminderSortBy.CreatedAt,
+  })
+  sortBy?: ReminderSortBy = ReminderSortBy.CreatedAt;
+
+  @IsOptional()
+  @IsEnum(SortDirection)
+  @ApiPropertyOptional({
+    enum: SortDirection,
+    default: SortDirection.DESC,
+  })
+  sortDir?: SortDirection = SortDirection.DESC;
+
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  @ApiPropertyOptional({
+    type: Number,
+    default: 1,
+  })
+  page?: number = 1;
+
+  @IsInt()
+  @IsOptional()
+  @Type(() => Number)
+  @ApiPropertyOptional({
+    type: Number,
+    default: 10,
+  })
+  pageSize?: number = 10;
 }

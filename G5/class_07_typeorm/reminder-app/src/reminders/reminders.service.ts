@@ -9,6 +9,8 @@ import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { ReminderCreateDto } from './dtos/reminder-create.dto';
 import { ReminderUpdateDto } from './dtos/reminder-update.dto';
 import { ReminderQueryDto } from './dtos/reminder-query.dto';
+import { ReminderSortBy } from '../common/types/reminder-sort-by.enum';
+import { SortDirection } from '../common/types/sort-direction.enum';
 
 @Injectable()
 export class RemindersService {
@@ -17,14 +19,21 @@ export class RemindersService {
     private readonly reminderRepository: Repository<Reminder>,
   ) {}
 
-  search({
+  async search({
     authorId,
     priority,
     startDueDate,
     endDueDate,
     isCompleted,
     searchTerm,
-  }: ReminderQueryDto): Promise<Reminder[]> {
+    sortBy = ReminderSortBy.CreatedAt,
+    sortDir = SortDirection.DESC,
+    page = 1,
+    pageSize = 10,
+  }: ReminderQueryDto): Promise<{
+    reminders: Reminder[];
+    total: number;
+  }> {
     let query: FindOptionsWhere<Reminder> = {};
 
     if (authorId) {
@@ -55,9 +64,19 @@ export class RemindersService {
       };
     }
 
-    return this.reminderRepository.find({
+    const [reminders, total] = await this.reminderRepository.findAndCount({
       where: query,
+      order: {
+        [`${sortBy}`]: sortDir,
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
+
+    return {
+      reminders,
+      total,
+    };
   }
 
   async getOne(id: number): Promise<Reminder> {
