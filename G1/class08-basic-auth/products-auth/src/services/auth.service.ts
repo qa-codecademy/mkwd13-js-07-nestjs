@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { User } from "../interfaces/user.interface";
+import { User, UserCredentials } from "../interfaces/user.interface";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcryptjs";
 
@@ -28,7 +28,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(userData.password, 8);
 
-    const newUser = {
+    const newUser: User = {
       id: uuid(),
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -41,6 +41,25 @@ export class AuthService {
     await this.saveUsers(users);
 
     const { password, ...userWithoutPassword } = newUser;
+
+    return userWithoutPassword;
+  }
+
+  static async loginUser(creds: UserCredentials) {
+    const users = await this.getUsers();
+
+    const foundUser = users.find(user => user.email === creds.email);
+
+    if (!foundUser) throw new Error("invalid credentials");
+
+    const isPasswordValid = await bcrypt.compare(
+      creds.password,
+      foundUser.password
+    );
+
+    if (!isPasswordValid) throw new Error("invalid credentials");
+
+    const { password, ...userWithoutPassword } = foundUser;
 
     return userWithoutPassword;
   }

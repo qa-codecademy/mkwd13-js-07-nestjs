@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { User } from "../interfaces/user.interface";
+import { User, UserCredentials } from "../interfaces/user.interface";
 import { AuthService } from "../services/auth.service";
 
 export class AuthController {
@@ -17,6 +17,20 @@ export class AuthController {
           error: (error as Error).message,
         })
         .status(400);
+    }
+  };
+
+  static loginUser: RequestHandler = async (req, res) => {
+    try {
+      const creds: UserCredentials = req.body;
+
+      const user = await AuthService.loginUser(creds);
+
+      res.json(user);
+    } catch (error) {
+      res
+        .status(401)
+        .json({ msg: "couldn't login user", error: (error as Error).message });
     }
   };
 }
