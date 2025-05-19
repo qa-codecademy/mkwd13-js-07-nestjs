@@ -10,12 +10,18 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RemindersService } from './reminders.service';
 import { ReminderCreateDto } from './dtos/reminder-create.dto';
 import { Reminder } from './reminder.entity';
 import { ReminderUpdateDto } from './dtos/reminder-update.dto';
 import { ReminderQueryDto } from './dtos/reminder-query.dto';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 
 @ApiTags('Reminders')
 @Controller('reminders')
@@ -32,10 +38,14 @@ export class RemindersController {
   @ApiOperation({
     summary: 'Search reminders',
   })
+  @ApiOkResponse({
+    type: PaginatedResponseDto<Reminder>,
+    description: 'Filtered, paginated, and sorted reminders',
+  })
   search(
     @Query() query: ReminderQueryDto,
-  ): Promise<{ reminders: Reminder[]; total: number }> {
-    return this.remindersService.search(query);
+  ): Promise<PaginatedResponseDto<Reminder>> {
+    return this.remindersService.search_v2(query);
   }
 
   // localhost:3000/api/reminders?userId=1 > this is ok
@@ -45,8 +55,8 @@ export class RemindersController {
   @Get('/user/:id')
   getUserReminders(
     @Param('id', ParseIntPipe) authorId: number,
-  ): Promise<{ reminders: Reminder[]; total: number }> {
-    return this.remindersService.search({ authorId });
+  ): Promise<PaginatedResponseDto<Reminder>> {
+    return this.remindersService.search_v1({ authorId });
   }
 
   @Get('/:id')

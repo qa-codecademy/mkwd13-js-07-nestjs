@@ -17,6 +17,7 @@ import { User } from '../users/user.entity';
         database: configService.get('DB_NAME'),
         entities: [Reminder, User],
         synchronize: configService.get('DB_HOST') !== 'production', // true
+        // logger: true,
       }),
       inject: [ConfigService],
     }),
