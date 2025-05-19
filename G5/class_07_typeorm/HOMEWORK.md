@@ -49,9 +49,12 @@ Movie Entity
    - Search movies by title
 
 2. Add sorting capabilities:
+
    - Sort by release year (default, DESC)
    - Sort by rating
    - Sort by duration
+
+3. Add pagination
 
 ## Technical Requirements
 

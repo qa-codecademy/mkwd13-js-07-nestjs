@@ -151,7 +151,9 @@ export class RemindersService {
     }
 
     if (searchTerm) {
-      queryBuilder.andWhere(`reminders.title ILIKE %${searchTerm}%`);
+      queryBuilder.andWhere(`reminders.title ILIKE :searchTerm`, {
+        searchTerm: `%${searchTerm}%`,
+      });
     }
 
     if (isCompleted !== undefined) {
@@ -197,8 +199,29 @@ export class RemindersService {
 
   async create(body: ReminderCreateDto): Promise<Reminder> {
     try {
-      const reminder = this.reminderRepository.create(body);
-      return await this.reminderRepository.save(reminder);
+      // const reminder = this.reminderRepository.create(body);
+      // return await this.reminderRepository.save(reminder);
+
+      const result = await this.reminderRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Reminder)
+        .values([body])
+        .execute();
+
+      console.log(result);
+
+      const id = result.identifiers[0]?.id as number;
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const response: any[] = await this.reminderRepository.query(
+        `SELECT * FROM reminders WHERE id = ${id}`,
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const reminder = response[0];
+
+      return reminder as Reminder;
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new BadRequestException(error.detail);
@@ -207,12 +230,9 @@ export class RemindersService {
 
   async update(id: number, body: ReminderUpdateDto): Promise<Reminder> {
     // Option 1:
-    const reminder = await this.getOne(id);
-
-    const newReminder = { ...reminder, ...body };
-
-    return this.reminderRepository.save(newReminder);
-
+    // const reminder = await this.getOne(id);
+    // const newReminder = { ...reminder, ...body };
+    // return this.reminderRepository.save(newReminder);
     // Option 2:
     // const result = await this.reminderRepository.update(
     //   {
@@ -221,9 +241,57 @@ export class RemindersService {
     //   body,
     // );
     // return this.getOne(id);
+    // Option 3:
+
+    await this.reminderRepository
+      .createQueryBuilder()
+      .update(Reminder)
+      .set(body)
+      .where('id = :id', { id })
+      .execute();
+
+    const reminder = await this.reminderRepository
+      .createQueryBuilder()
+      .where('id = :id', { id })
+      .getOne();
+
+    if (!reminder) {
+      throw new NotFoundException(
+        `Issue while updating reminder with ID: ${id}`,
+      );
+    }
+
+    return reminder;
   }
 
   async delete(id: number): Promise<void> {
+    // Primary option
     await this.reminderRepository.softDelete(id);
+
+    // Restoring with new syntax
+    // await this.reminderRepository.restore(id);
+
+    // Create query builder (hard) delete
+    // await this.reminderRepository
+    //   .createQueryBuilder()
+    //   .delete()
+    //   .from(Reminder)
+    //   .where('id = :id', { id })
+    //   .execute();
+
+    // Create query builder soft delete
+    // await this.reminderRepository
+    //   .createQueryBuilder()
+    //   .softDelete()
+    //   .from(Reminder)
+    //   .where('id = :id', { id })
+    //   .execute();
+
+    // Create query builder recovery
+    // await this.reminderRepository
+    //   .createQueryBuilder('reminders')
+    //   .restore()
+    //   .where('id = :id', { id })
+    //   .execute();
   }
 }
