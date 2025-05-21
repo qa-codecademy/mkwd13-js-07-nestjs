@@ -2,9 +2,11 @@ import "dotenv/config";
 import express from "express";
 import { v4 as uuid } from "uuid";
 import { globalRouter } from "./const/router.const";
+import cors from "cors";
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use("/api", globalRouter);
