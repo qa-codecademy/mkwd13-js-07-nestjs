@@ -2,11 +2,31 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as session from 'express-session';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api');
+
+  // Session middleware
+  app.use(cookieParser());
+
+  app.use(
+    session({
+      secret:
+        'long-extremely-save-key-phrase-which-is-hard-to-guess-something-like-this-one', // keep this in .env file!!!
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 3600000, // 1 hour - this is in MS
+        secure: process.env.NODE_ENV === 'production', // secure: true ensures the cookie is only sent over HTTPS in production environments
+        httpOnly: true, // httpOnly: true prevents JavaScript access to the cookie, protecting against XSS attacks
+        sameSite: 'lax', // Allows cookies to be sent in cross-site requests when navigating from external sites
+      },
+    }),
+  );
 
   // Validation and transformation pipe for DTOs
   app.useGlobalPipes(

@@ -10,6 +10,7 @@ import { User } from './user.entity';
 import { UserResponse } from './dtos/user-response.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login-user.dto';
+import { LoginResponse } from './dtos/login-response.dto';
 
 @Injectable()
 export class UserService {
@@ -42,7 +43,7 @@ export class UserService {
     return restOfTheUser;
   }
 
-  async loginUser({ username, password }: LoginDto): Promise<any> {
+  async loginUser({ username, password }: LoginDto): Promise<LoginResponse> {
     const foundUser = await this.userRepository.findOneBy({
       username,
     });

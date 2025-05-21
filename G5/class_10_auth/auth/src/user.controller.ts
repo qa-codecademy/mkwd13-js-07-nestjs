@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Session } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User } from './user.entity';
 import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
@@ -26,7 +26,23 @@ export class UserController {
   @ApiOperation({
     summary: 'Login a user',
   })
-  login(@Body() body: LoginDto): Promise<any> {
-    return this.userService.loginUser(body);
+  async login(
+    @Body() body: LoginDto,
+    @Session() session: Record<string, any>,
+  ): Promise<any> {
+    const { loggedIn, user } = await this.userService.loginUser(body);
+
+    if (loggedIn) {
+      session.userId = user.id;
+    }
+
+    console.log('login session', session);
+  }
+
+  @Post('/logout')
+  logout(@Session() session: Record<string, any>) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    session.destroy();
+    console.log('logout session', session);
   }
 }
