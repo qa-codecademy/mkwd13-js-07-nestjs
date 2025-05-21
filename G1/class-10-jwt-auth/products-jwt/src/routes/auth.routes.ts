@@ -12,3 +12,4 @@ authRouter.post(
 );
 authRouter.post("/login", AuthController.loginUser);
 authRouter.post("/logout", AuthController.logoutUser);
+authRouter.post("/refresh-token", AuthController.refreshAccessToken);
