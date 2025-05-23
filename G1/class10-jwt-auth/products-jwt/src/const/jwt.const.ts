@@ -5,7 +5,7 @@ export const createAccessToken = (userId: string) => {
   const secret = process.env.ACCESS_TOKEN_SECRET as string;
 
   return jwt.sign({ userId }, secret, {
-    expiresIn: "20m",
+    expiresIn: "3s",
   });
 };
 

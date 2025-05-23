@@ -90,6 +90,30 @@ const fetchProducts = async () => {
     },
   });
 
+  //1. if status is 403 we try to refresh token
+  if (response.status === 403) {
+    //Here we do the refresh token logic
+    const refreshTokenRes = await fetch(`${API_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "refresh-token": refreshToken,
+      },
+    });
+
+    console.log(refreshTokenRes);
+
+    //2. if refresh token returns status 403 we return and logout user.
+    if (refreshTokenRes.status === 403) {
+      return;
+    }
+
+    accessToken = refreshTokenRes.headers.get("access-token");
+
+    //3. if refresh token is successful attempt to fetch products again
+    fetchProducts();
+    return;
+  }
+
   const products = await response.json();
 
   productsListEl.innerHTML = products
@@ -97,6 +121,26 @@ const fetchProducts = async () => {
     .join("");
 
   console.log("THESE ARE THE PRODUCTS", products);
+};
+const logoutUser = async () => {
+  const logoutResponse = await fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    headers: {
+      "refresh-token": refreshToken,
+    },
+  });
+
+  console.log(logoutResponse);
+
+  //Reset data and delete storage
+  window.localStorage.clear();
+  refreshToken = "";
+  accessToken = "";
+  userData = null;
+
+  loginViewEl.style.display = "block";
+  userControlsEl.style.visibility = "hidden";
+  productsViewEl.style.display = "none";
 };
 
 //LISTENERS
@@ -108,6 +152,10 @@ loginFormEl.addEventListener("submit", e => {
 
 productsBtn.addEventListener("click", () => {
   fetchProducts();
+});
+
+logoutBtn.addEventListener("click", () => {
+  logoutUser();
 });
 
 //GLOBAL FUNCTION CALLS
