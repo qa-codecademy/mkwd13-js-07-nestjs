@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -18,6 +19,7 @@ import { Roles } from 'src/roles/roles.decorator';
 import { ROUTES } from '@nestjs/core/router/router-module';
 import { RoleType } from 'src/roles/roles.model';
 import { RolesGuard } from 'src/roles/roles.guard';
+import { ProductFiltersDto } from './dtos/product-filters.dto';
 
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('products')
@@ -25,8 +27,8 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query() productFilters: ProductFiltersDto) {
+    return this.productsService.findAll(productFilters);
   }
 
   @Get(':id')
