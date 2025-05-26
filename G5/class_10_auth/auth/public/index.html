@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auth Session Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Auth Session Demo</h1>
+
+    <div class="container">
+      <div class="form-section">
+        <h2>Authentication</h2>
+
+        <div id="registerForm">
+          <h3>Register</h3>
+          <div class="form-group">
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" required />
+          </div>
+          <div class="form-group">
+            <label for="registerName">Name:</label>
+            <input type="text" id="registerName" required />
+          </div>
+          <button onclick="register()">Register</button>
+        </div>
+
+        <div id="loginForm">
+          <h3>Login</h3>
+          <div class="form-group">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" required />
+          </div>
+          <button onclick="login()">Login</button>
+        </div>
+
+        <div id="logoutSection" style="display: none">
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <div class="products-section">
+        <h2>Products</h2>
+        <button onclick="loadProducts()">Load Regular Products</button>
+        <button onclick="loadPremiumProducts()">Load Premium Products</button>
+        <div id="productsList"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
