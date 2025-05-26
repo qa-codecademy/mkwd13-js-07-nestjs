@@ -1,4 +1,5 @@
 import { Order } from 'src/orders/entities/order.entity';
+import { RoleType } from 'src/roles/roles.model';
 import { UserAddress } from 'src/user-address/entities/user-address.entity';
 import {
   Column,
@@ -21,6 +22,11 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({
+    default: RoleType.USER,
+  })
+  role: RoleType;
 
   @Column({
     name: 'first_name',
