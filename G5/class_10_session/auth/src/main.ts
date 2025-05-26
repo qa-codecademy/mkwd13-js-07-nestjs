@@ -4,9 +4,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.setGlobalPrefix('api');
 
@@ -20,7 +22,7 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        maxAge: 3600000, // 1 hour - this is in MS
+        maxAge: 3600, // 1 hour - this is in MS
         secure: process.env.NODE_ENV === 'production', // secure: true ensures the cookie is only sent over HTTPS in production environments
         httpOnly: true, // httpOnly: true prevents JavaScript access to the cookie, protecting against XSS attacks
         sameSite: 'lax', // Allows cookies to be sent in cross-site requests when navigating from external sites
@@ -36,6 +38,15 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   // Swagger docs setup / config
   const config = new DocumentBuilder()
