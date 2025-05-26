@@ -90,22 +90,6 @@ async function loadProducts() {
   }
 }
 
-async function loadPremiumProducts() {
-  try {
-    const response = await fetch(`${API_URL}/products/premium`, {
-      credentials: 'include',
-    });
-    if (response.ok) {
-      const products = await response.json();
-      displayProducts(products, true);
-    } else {
-      alert('Please login to view premium products');
-    }
-  } catch (error) {
-    alert('Error loading premium products');
-  }
-}
-
 function displayProducts(products, isPremium) {
   const productsList = document.getElementById('productsList');
   productsList.innerHTML = products
