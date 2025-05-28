@@ -55,20 +55,70 @@ export class UserService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const accessToken = await this.jwtService.signAsync(
-      {
-        id: existingUser.id,
-        email: existingUser.email,
-      },
-      {
-        expiresIn: '1m',
-      },
-    );
+    const tokenPayload = {
+      id: existingUser.id,
+      email: existingUser.email,
+    };
+
+    const accessToken = await this.jwtService.signAsync(tokenPayload, {
+      expiresIn: '1m',
+    });
+
+    const refreshToken = await this.jwtService.signAsync(tokenPayload, {
+      expiresIn: '2m',
+    });
+
+    await this.userRepository.update(existingUser.id, { refreshToken });
 
     return {
       user: existingUser,
       accessToken,
+      refreshToken,
     };
+  }
+
+  async refreshToken(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync<{ email: string }>(
+        token,
+      );
+      console.log(payload);
+
+      const existingUser = await this.userRepository.findOneBy({
+        email: payload.email,
+      });
+
+      if (existingUser?.refreshToken !== token) {
+        throw new UnauthorizedException('Refresh token is not valid');
+      }
+
+      if (!existingUser) {
+        throw new UnauthorizedException('Refresh token is not valid');
+      }
+
+      const tokenPayload = {
+        id: existingUser.id,
+        email: existingUser.email,
+      };
+
+      const accessToken = await this.jwtService.signAsync(tokenPayload, {
+        expiresIn: '1m',
+      });
+
+      const refreshToken = await this.jwtService.signAsync(tokenPayload, {
+        expiresIn: '2m',
+      });
+
+      await this.userRepository.update(existingUser.id, { refreshToken });
+
+      return {
+        user: existingUser,
+        accessToken,
+        refreshToken,
+      };
+    } catch {
+      throw new UnauthorizedException('Refresh token is not valid');
+    }
   }
 
   async profile(token: string) {

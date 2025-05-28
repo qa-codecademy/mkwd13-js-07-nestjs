@@ -9,6 +9,7 @@ import {
 import { UserService } from './user.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtAuthGuard } from '../guards/jwt.guard';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('user')
 export class UserController {
@@ -22,6 +23,11 @@ export class UserController {
   @Post('/login')
   login(@Body() credentials: LoginDto) {
     return this.userService.login(credentials);
+  }
+
+  @Post('/refresh')
+  refresh(@Body() { refreshToken }: RefreshTokenDto) {
+    return this.userService.refreshToken(refreshToken);
   }
 
   @Get('/profile')
