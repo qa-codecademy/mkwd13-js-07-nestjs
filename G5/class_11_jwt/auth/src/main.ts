@@ -16,7 +16,10 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder().setTitle('JWT test').build();
+  const config = new DocumentBuilder()
+    .setTitle('JWT test')
+    .addBearerAuth()
+    .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

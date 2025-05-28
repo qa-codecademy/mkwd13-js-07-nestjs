@@ -124,4 +124,4 @@ Achieving these will grant you legendary status among intergalactic zookeepers!
 
 - **Enhance `AuthModule`**:
   - Upon successful login, issue both an JWT access token (short-lived) and a JWT refresh token (long-lived).
-  - Securely store the refresh token (e.g., in the
+  - Securely store the refresh token (e.g., in the database)

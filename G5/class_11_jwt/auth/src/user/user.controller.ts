@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
+  Param,
+  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -10,6 +13,10 @@ import { UserService } from './user.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtAuthGuard } from '../guards/jwt.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from '../decorators/roles.decorator';
+import { Role } from '../types/role.enum';
+import { RolesGuard } from '../guards/role.guard';
 
 @Controller('user')
 export class UserController {
@@ -39,9 +46,26 @@ export class UserController {
 
   @Get('/random')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   random() {
     return {
       message: 'You are logged in, so you can see this!',
     };
+  }
+
+  @Get('/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(Role.User, Role.Admin)
+  userInfo(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.getUserInfo(id);
+  }
+
+  @Delete('/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(Role.Admin)
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.userService.deleteUser(id);
   }
 }
