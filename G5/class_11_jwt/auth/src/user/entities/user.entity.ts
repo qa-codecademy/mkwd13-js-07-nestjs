@@ -33,6 +33,17 @@ export class User {
   })
   password: string;
 
+  @Column({
+    nullable: true,
+  })
+  @ApiProperty({
+    type: String,
+  })
+  refreshToken: string;
+
+  // Used for multiple access points (devices)
+  // refreshTokens: string[]
+
   @CreateDateColumn()
   @ApiProperty({
     type: Date,
