@@ -21,6 +21,14 @@ export class RolesGuard implements CanActivate {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { user } = context.switchToHttp().getRequest();
     console.log('USER IN REQ:', user);
-    return true;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return requiredRoles.includes(user.role);
   }
 }
+
+// Types of role checking
+// Who can access this endpoint?
+// 1. @Roles(Role.User, Role.Admin, 'all-of-these') Any of these roles
+// 2. @Roles(Role.Moderator, Role.Platform_Admin, 'all-of-these') All of these roles
+// 3. @Roles(Role.Editor, 'all-except-this') All except this
