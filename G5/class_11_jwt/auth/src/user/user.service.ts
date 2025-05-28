@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +10,7 @@ import { Repository } from 'typeorm';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -56,16 +58,19 @@ export class UserService {
     }
 
     const tokenPayload = {
-      id: existingUser.id,
+      sub: existingUser.id,
       email: existingUser.email,
+      role: existingUser.role,
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload, {
       expiresIn: '1m',
+      secret: 'taen_kluc_za_access_token',
     });
 
     const refreshToken = await this.jwtService.signAsync(tokenPayload, {
       expiresIn: '2m',
+      secret: 'a_ovoj_za_refresh_token',
     });
 
     await this.userRepository.update(existingUser.id, { refreshToken });
@@ -81,6 +86,9 @@ export class UserService {
     try {
       const payload = await this.jwtService.verifyAsync<{ email: string }>(
         token,
+        {
+          secret: 'a_ovoj_za_refresh_token',
+        },
       );
       console.log(payload);
 
@@ -97,16 +105,19 @@ export class UserService {
       }
 
       const tokenPayload = {
-        id: existingUser.id,
+        sub: existingUser.id,
         email: existingUser.email,
+        role: existingUser.role,
       };
 
       const accessToken = await this.jwtService.signAsync(tokenPayload, {
         expiresIn: '1m',
+        secret: 'taen_kluc_za_access_token',
       });
 
       const refreshToken = await this.jwtService.signAsync(tokenPayload, {
         expiresIn: '2m',
+        secret: 'a_ovoj_za_refresh_token',
       });
 
       await this.userRepository.update(existingUser.id, { refreshToken });
@@ -136,5 +147,19 @@ export class UserService {
     } catch {
       throw new UnauthorizedException('You must log in to see this info!');
     }
+  }
+
+  async getUserInfo(id: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException(`User with ${id} not found`);
+    }
+
+    return user;
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    await this.userRepository.delete(id);
   }
 }

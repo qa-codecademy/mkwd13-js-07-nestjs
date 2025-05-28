@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from '../../types/role.enum';
 
 @Entity('users')
 export class User {
@@ -43,6 +44,11 @@ export class User {
 
   // Used for multiple access points (devices)
   // refreshTokens: string[]
+
+  @Column({
+    default: Role.User,
+  })
+  role: Role;
 
   @CreateDateColumn()
   @ApiProperty({
