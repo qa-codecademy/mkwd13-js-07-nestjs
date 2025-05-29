@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UserRole } from 'src/users/entity/user.entity';
 
 /**
  * JWT Strategy for Passport.js in NestJS
@@ -40,8 +41,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param payload - The decoded JWT payload
    * @returns User information to be attached to the request
    */
-  async validate(payload: { email: string; userId: string }) {
+  async validate(payload: {
+    email: string;
+    userId: string;
+    roles: UserRole[];
+  }) {
     // Return user data that will be available in the Request object
+    // request.user = payload
     return payload;
   }
 }
