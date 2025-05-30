@@ -33,7 +33,9 @@ export class AuthService {
       throw new BadRequestException('Email already exists');
     }
 
-    return this.userRepository.save(registerDto);
+    const user = this.userRepository.create(registerDto);
+
+    return this.userRepository.save(user);
   }
 
   async login({ email, password }: LoginDto): Promise<TokenPairDto> {
@@ -44,6 +46,11 @@ export class AuthService {
     }
 
     const arePasswordsMatching = await user.comparePasswords(password);
+
+    console.log(
+      '🚀 ivo-test ~ AuthService ~ login ~ arePasswordsMatching:',
+      arePasswordsMatching,
+    );
 
     if (!arePasswordsMatching) {
       throw new UnauthorizedException('Invalid credentials');
@@ -56,11 +63,36 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async refresh(token: string): Promise<TokenPairDto> {
+    try {
+      const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      const user = await this.userRepository.findByEmail(payload.email);
+
+      if (!user || user.refreshToken !== token) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const { accessToken, refreshToken } = await this.#generateTokens(user);
+
+      await this.userRepository.update(user.id, { refreshToken });
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
   async #generateTokens(user: User): Promise<TokenPairDto> {
     const payload = {
       sub: user.id,
       email: user.email,
-      role: 'test',
+      role: user.role,
     } satisfies JwtPayload;
 
     const [accessToken, refreshToken] = await Promise.all([

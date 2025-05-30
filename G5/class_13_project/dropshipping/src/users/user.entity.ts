@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../common/types/role.enum';
 
 @Entity('users')
 export class User {
@@ -44,10 +45,19 @@ export class User {
   age: number;
 
   @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.User,
+  })
+  role: Role;
+
+  @Column({
     name: 'refresh_token',
+    nullable: true,
+    type: 'text',
   })
   // no need for Api Property as it will not be returned ever
-  refreshToken: string;
+  refreshToken: string | null;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -73,6 +83,7 @@ export class User {
   }
 
   async comparePasswords(attempt: string): Promise<boolean> {
+    console.log(attempt, this.password);
     return await bcrypt.compare(attempt, this.password);
   }
 }
