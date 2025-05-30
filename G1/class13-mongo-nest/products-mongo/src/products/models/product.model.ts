@@ -9,7 +9,11 @@ export class Product {
   @Prop()
   name: string;
 
-  @Prop()
+  @Prop({
+    type: String,
+    minlength: 3,
+    maxlength: 30,
+  })
   title: string;
 
   @Prop()
