@@ -5,6 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +13,7 @@ import { ProductCategory } from '../common/types/product-category.enum';
 import { ProductDetailsDto } from './dto/product-details.dto';
 import { User } from '../users/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { OrderItem } from '../orders/entities/order-item.entity';
 
 @Entity('products')
 export class Product {
@@ -61,6 +63,9 @@ export class Product {
   @ApiProperty({ description: 'ID of the user who created the product' })
   @Column({ name: 'created_by' })
   createdById: string;
+
+  @OneToMany(() => OrderItem, (items) => items.product)
+  orderItems: OrderItem[];
 
   @CreateDateColumn({
     name: 'created_at',

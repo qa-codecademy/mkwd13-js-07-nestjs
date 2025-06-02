@@ -44,4 +44,8 @@ export class ProductsService {
 
     return this.findOne(id);
   }
+
+  async delete(id: string): Promise<void> {
+    await this.productRepository.softDelete(id);
+  }
 }

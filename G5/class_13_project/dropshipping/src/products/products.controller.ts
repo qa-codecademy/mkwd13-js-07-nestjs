@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -15,9 +18,12 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -81,5 +87,16 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, ProductOwnershipGuard)
   update(@Param('id') id: string, @Body() productUpdateDto: ProductUpdateDto) {
     return this.productsService.update(id, productUpdateDto);
+  }
+
+  @Delete('/:id')
+  @ApiOperation({ summary: 'Soft delete a product' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  @ApiNoContentResponse({
+    description: 'The product has been successfully deleted.',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id') id: string) {
+    await this.productsService.delete(id);
   }
 }
