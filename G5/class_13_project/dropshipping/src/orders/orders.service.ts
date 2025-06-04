@@ -1,19 +1,27 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { OrderCreateDto } from './dto/order-create.dto';
 import { Order } from './entities/order.entity';
 import { ICurrentUser } from '../common/types/current-user';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Product } from '../products/product.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderItemCreate } from '../common/types/order-item-create';
+import { OrderUpdateDto } from './dto/order-update.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { OrderStatus } from '../common/types/order-status.enum';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+  ) {}
 
   async create(
     { items }: OrderCreateDto,
@@ -94,5 +102,116 @@ export class OrdersService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async search({ userId }: { userId: string }): Promise<Order[]> {
+    return await this.orderRepository.find({
+      where: { createdById: userId },
+      relations: ['items', 'items.product', 'createdBy'],
+    });
+  }
+
+  async findOne(id: string, userId: string): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: {
+        id,
+        createdById: userId,
+      },
+      relations: ['items', 'items.product', 'createdBy'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID: ${id} not found`);
+    }
+
+    return order;
+  }
+
+  async update(
+    id: string,
+    { status: newStatus }: OrderUpdateDto,
+    currentUser: ICurrentUser,
+  ) {
+    if (newStatus === OrderStatus.Pending) {
+      throw new BadRequestException('Invalid status update');
+    }
+
+    const order = await this.findOne(id, currentUser.id);
+
+    const currentStatus = order.status;
+
+    if (order.createdById !== currentUser.id) {
+      throw new ForbiddenException('You are not allowed to edit this order');
+    }
+
+    // If the current status of the order is Pending the user is allowed to cancel this order
+    if (
+      currentStatus === OrderStatus.Pending &&
+      newStatus === OrderStatus.Canceled
+    ) {
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        const items = await queryRunner.manager.find(OrderItem, {
+          where: { orderId: order.id },
+          relations: ['product'],
+        });
+
+        for (const item of items) {
+          // return back in stock the taken items for each product
+          await queryRunner.manager.update(
+            Product,
+            { id: item.productId },
+            { stock: () => `stock + ${item.quantity}` },
+          );
+        }
+
+        await queryRunner.manager.update(Order, { id }, { status: newStatus });
+        await queryRunner.commitTransaction();
+      } catch (error) {
+        await queryRunner.rollbackTransaction();
+        throw error;
+      }
+    }
+
+    if (currentStatus === OrderStatus.Canceled) {
+      throw new BadRequestException(
+        'You cannot update an order which is canceled',
+      );
+    }
+
+    if (
+      currentStatus === OrderStatus.Pending &&
+      newStatus === OrderStatus.InDelivery
+    ) {
+      await this.orderRepository.update(id, { status: newStatus });
+    }
+
+    if (
+      currentStatus === OrderStatus.InDelivery &&
+      newStatus === OrderStatus.Delivered
+    ) {
+      await this.orderRepository.update(id, { status: newStatus });
+    }
+
+    if (
+      currentStatus === OrderStatus.InDelivery &&
+      newStatus === OrderStatus.Canceled
+    ) {
+      throw new BadRequestException(
+        'You cannot cancel an order that is in process of delivery',
+      );
+    }
+
+    if (
+      currentStatus === OrderStatus.Delivered &&
+      newStatus === OrderStatus.Canceled
+    ) {
+      throw new BadRequestException('You cannot cancel a delivered order');
+    }
+
+    return this.findOne(id, currentUser.id);
   }
 }
