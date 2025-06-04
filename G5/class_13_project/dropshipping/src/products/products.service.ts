@@ -49,3 +49,5 @@ export class ProductsService {
     await this.productRepository.softDelete(id);
   }
 }
+
+// await this.productRepository.update(id, { name: 'DELETED_' }); workaround for unique columns in SQL while soft deleting

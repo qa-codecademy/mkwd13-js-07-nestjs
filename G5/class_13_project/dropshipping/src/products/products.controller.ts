@@ -30,15 +30,19 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ICurrentUser } from '../common/types/current-user';
 import { ProductUpdateDto } from './dto/product-update.dto';
 import { ProductOwnershipGuard } from './guards/product-ownership.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../common/types/role.enum';
 
 @ApiTags('Products')
 @Controller('products')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @Roles(Role.Moderator, Role.Admin)
   @ApiOperation({ summary: 'Create a new product' })
   @ApiBody({ type: ProductCreateDto })
   @ApiCreatedResponse({
@@ -54,6 +58,7 @@ export class ProductsController {
   }
 
   @Get()
+  @Roles(Role.User, Role.Moderator, Role.Admin)
   @ApiOperation({ summary: 'Search for products' })
   @ApiOkResponse({
     description: 'The products have been successfully searched.',
@@ -64,6 +69,7 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @Roles(Role.User, Role.Moderator, Role.Admin)
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiOkResponse({
     description: 'The product has been successfully found.',
@@ -75,6 +81,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @Roles(Role.Moderator, Role.Admin)
   @ApiOperation({ summary: 'Update a product by ID' })
   @ApiBody({ type: ProductUpdateDto })
   @ApiOkResponse({
@@ -89,6 +96,7 @@ export class ProductsController {
   }
 
   @Delete('/:id')
+  @Roles(Role.Admin)
   @ApiOperation({ summary: 'Soft delete a product' })
   @ApiParam({ name: 'id', description: 'Product ID' })
   @ApiNoContentResponse({
