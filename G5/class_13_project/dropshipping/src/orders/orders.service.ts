@@ -7,13 +7,14 @@ import {
 import { OrderCreateDto } from './dto/order-create.dto';
 import { Order } from './entities/order.entity';
 import { ICurrentUser } from '../common/types/current-user';
-import { DataSource, Repository } from 'typeorm';
+import { Between, DataSource, FindOptionsWhere, Repository } from 'typeorm';
 import { Product } from '../products/product.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderItemCreate } from '../common/types/order-item-create';
 import { OrderUpdateDto } from './dto/order-update.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderStatus } from '../common/types/order-status.enum';
+import { OrderStatsQueryDto } from './dto/order-stats-query.dto';
 
 @Injectable()
 export class OrdersService {
@@ -21,6 +22,8 @@ export class OrdersService {
     private readonly dataSource: DataSource,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepository: Repository<OrderItem>,
   ) {}
 
   async create(
@@ -213,5 +216,121 @@ export class OrdersService {
     }
 
     return this.findOne(id, currentUser.id);
+  }
+
+  getBestSellingProducts({ startDate, endDate }: OrderStatsQueryDto) {
+    const where: FindOptionsWhere<OrderItem> = {};
+    if (startDate && endDate) {
+      where.order = {
+        createdAt: Between(startDate, endDate),
+      };
+    }
+
+    const queryBuilder = this.orderItemRepository
+      .createQueryBuilder('item')
+      .select([
+        'product.id as "productId"',
+        'product.name as "productName"',
+        'SUM(item.quantity) as "totalQuantity"',
+        'SUM(item.quantity * item.price) as "totalRevenue"',
+      ])
+      .innerJoin('item.product', 'product')
+      .innerJoin('item.order', 'order')
+      .where(where)
+      .groupBy('"productId", "productName"')
+      .orderBy('"totalQuantity"', 'DESC');
+
+    return queryBuilder.getRawMany();
+  }
+
+  getRevenueStats({
+    startDate,
+    endDate,
+    period = 'month',
+  }: OrderStatsQueryDto) {
+    const where: FindOptionsWhere<Order> = {};
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate);
+    }
+
+    let groupBy: string;
+
+    switch (period) {
+      case 'day':
+        groupBy = 'DATE(created_at)';
+        break;
+      case 'week':
+        groupBy = "TO_CHAR(created_at, 'WW')";
+        break;
+      case 'month':
+        groupBy = "TO_CHAR(created_at, 'YYYY-MM')";
+        break;
+      case 'year':
+        groupBy = "TO_CHAR(created_at, 'YYYY')";
+        break;
+      default:
+        groupBy = "TO_CHAR(created_at, 'WW')";
+    }
+
+    const queryBuilder = this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        `${groupBy} as period`, // which period are we considering
+        'COUNT(*) as "orderCount"', // how many orders do we have in that period of time
+        'SUM("totalPrice") "totalRevenue"', // how much revenue do we have in that period
+      ])
+      .where(where)
+      .groupBy('period')
+      .orderBy('period', 'ASC');
+
+    return queryBuilder.getRawMany();
+  }
+
+  getOrderStats({ startDate, endDate, period = 'month' }: OrderStatsQueryDto) {
+    const where: FindOptionsWhere<Order> = {};
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate);
+    }
+
+    let groupBy: string;
+
+    switch (period) {
+      case 'day':
+        groupBy = 'DATE(created_at)';
+        break;
+      case 'week':
+        groupBy = "TO_CHAR(created_at, 'WW')";
+        break;
+      case 'month':
+        groupBy = "TO_CHAR(created_at, 'YYYY-MM')";
+        break;
+      case 'year':
+        groupBy = "TO_CHAR(created_at, 'YYYY')";
+        break;
+      default:
+        groupBy = "TO_CHAR(created_at, 'WW')";
+    }
+
+    const queryBuilder = this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        `${groupBy} as period`,
+        'COUNT(*) as "totalOrders"',
+        'SUM(CASE WHEN status = :pending THEN 1 ELSE 0 END) as "pendingStatus"',
+        'SUM(CASE WHEN status = :inDelivery THEN 1 ELSE 0 END) as "inDeliveryStatus"',
+        'SUM(CASE WHEN status = :delivered THEN 1 ELSE 0 END) as "deliveredStatus"',
+        'SUM(CASE WHEN status = :canceled THEN 1 ELSE 0 END) as "canceledStatus"',
+      ])
+      .where(where)
+      .setParameters({
+        pending: OrderStatus.Pending,
+        inDelivery: OrderStatus.InDelivery,
+        delivered: OrderStatus.Delivered,
+        canceled: OrderStatus.Canceled,
+      })
+      .groupBy('period')
+      .orderBy('period', 'ASC');
+
+    return queryBuilder.getRawMany();
   }
 }

@@ -55,6 +55,7 @@ export class Order {
 
   @CreateDateColumn({
     name: 'created_at',
+    type: 'timestamp with time zone',
   })
   @ApiProperty({ description: 'Order creation timestamp' })
   createdAt: Date;
